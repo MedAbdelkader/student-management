@@ -213,7 +213,8 @@ class GetAllStudentsTest {
         List<Student> expectedStudents = Arrays.asList(student1, student2, student3);
         when(studentRepository.findAll()).thenReturn(expectedStudents);
 
-
+        // Act - Exécuter la méthode à tester
+        List<Student> result = studentService.getAllStudents();
 
         // Assert - Vérifier les interactions avec le mock
         verify(studentRepository, times(1)).findAll();
