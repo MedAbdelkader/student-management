@@ -20,7 +20,7 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 echo 'Exécution des tests unitaires...'
-                sh 'mvn test'
+                bat 'mvn clean test'
             }
             post {
                 always {
@@ -32,8 +32,8 @@ pipeline {
          stage('Build with Maven') {
                     steps {
                         echo 'Compilation du projet Spring Boot...'
-                        //sh 'mvn clean package -DskipTests'
-                        sh 'mvn -DskipTests package'
+                        //bat 'mvn clean package -DskipTests'
+                        bat 'mvn -DskipTests package'
                     }
                 }
 
@@ -42,7 +42,7 @@ pipeline {
             steps {
                 echo 'Construction de l\'image Docker...'
                 script {
-                    sh """
+                    bat """
                         docker build -t ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} .
                         docker tag ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest
                     """
@@ -54,8 +54,8 @@ pipeline {
             steps {
                 echo 'Push de l\'image sur Docker Hub...'
                 script {
-                    sh """
-                        echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
+                    bat """
+                        docker login -u ${DOCKERHUB_CREDENTIALS_USR} -p ${DOCKERHUB_CREDENTIALS_PSW}
                         docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
                         docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest
                         docker logout
@@ -74,9 +74,9 @@ pipeline {
             echo 'Le pipeline a échoué.'
         }
         always {
-            sh """
-                docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} || true
-                docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest || true
+            bat """
+                docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} || exit /b 0
+                docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest || exit /b 0
             """
         }
     }
