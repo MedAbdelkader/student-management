@@ -16,13 +16,7 @@ pipeline {
             }
         }
         
-        stage('Build with Maven') {
-            steps {
-                echo 'Compilation du projet Spring Boot...'
-                sh 'mvn clean package -DskipTests'
-            }
-        }
-        
+
         stage('Unit Tests') {
             steps {
                 echo 'Exécution des tests unitaires...'
@@ -34,6 +28,15 @@ pipeline {
                 }
             }
         }
+
+         stage('Build with Maven') {
+                    steps {
+                        echo 'Compilation du projet Spring Boot...'
+                        //sh 'mvn clean package -DskipTests'
+                        sh 'mvn -DskipTests package'
+                    }
+                }
+
         
         stage('Build Docker Image') {
             steps {
