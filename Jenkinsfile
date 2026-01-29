@@ -1,13 +1,13 @@
 pipeline {
     agent any
-    
+
     environment {
         DOCKERHUB_USERNAME = 'abdelkaderbouafoura'
         IMAGE_NAME = 'student-management'
         IMAGE_TAG = "${BUILD_NUMBER}"
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
@@ -15,7 +15,6 @@ pipeline {
                 checkout scm
             }
         }
-        
 
         stage('Unit Tests') {
             steps {
@@ -29,41 +28,40 @@ pipeline {
             }
         }
 
-         stage('Build with Maven') {
-                    steps {
-                        echo 'Compilation du projet Spring Boot...'
-                        sh 'mvn -DskipTests package'
-                    }
-                }
+        stage('Build with Maven') {
+            steps {
+                echo 'Compilation du projet Spring Boot...'
+                sh 'mvn -DskipTests package'
+            }
+        }
 
-        
         stage('Build Docker Image') {
             steps {
                 echo 'Construction de l\'image Docker...'
                 script {
-                    sh """
+                    sh '''
                         docker build -t ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} .
                         docker tag ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest
-                    """
+                    '''
                 }
             }
         }
-        
+
         stage('Push Docker Image') {
             steps {
                 echo 'Push de l\'image sur Docker Hub...'
                 script {
-                    sh """
+                    sh '''
                         echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
                         docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
                         docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest
                         docker logout
-                    """
+                    '''
                 }
             }
         }
     }
-    
+
     post {
         success {
             echo 'Pipeline exécuté avec succès!'
@@ -73,10 +71,11 @@ pipeline {
             echo 'Le pipeline a échoué.'
         }
         always {
-            sh """
+            sh '''
                 docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} || true
                 docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest || true
-            """
+            '''
         }
     }
 }
+
