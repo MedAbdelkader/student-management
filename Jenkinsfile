@@ -27,6 +27,14 @@ pipeline {
                 }
             }
         }
+          stage('SonarQube Analysis') {
+            steps {
+                echo 'Analyse du code avec SonarQube...'
+                withSonarQubeEnv('Sonar') {
+                    sh 'mvn sonar:sonar'
+                }
+            }
+        }
 
         stage('Build with Maven') {
             steps {
