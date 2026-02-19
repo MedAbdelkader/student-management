@@ -19,7 +19,7 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 echo 'Exécution des tests unitaires...'
-                sh 'mvn test'
+                sh 'mvn clean test'
             }
             post {
                 always {
@@ -27,7 +27,8 @@ pipeline {
                 }
             }
         }
-          stage('SonarQube Analysis') {
+
+        stage('SonarQube Analysis') {
             steps {
                 echo 'Analyse du code avec SonarQube...'
                 withSonarQubeEnv('Sonar') {
@@ -47,10 +48,9 @@ pipeline {
             steps {
                 echo 'Construction de l\'image Docker...'
                 script {
-                    sh '''
-                        docker build -t ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} .
-                        docker tag ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest
-                    '''
+                    // Utilisation de doubles guillemets pour l'interpolation des variables
+                    sh "docker build -t ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                    sh "docker tag ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
                 }
             }
         }
@@ -59,12 +59,11 @@ pipeline {
             steps {
                 echo 'Push de l\'image sur Docker Hub...'
                 script {
-                    sh '''
-                        echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
-                        docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                        docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest
-                        docker logout
-                    '''
+                    // Les variables _PSW et _USR sont injectées par Jenkins via credentials()
+                    sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
+                    sh "docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
+                    sh "docker logout"
                 }
             }
         }
@@ -79,11 +78,11 @@ pipeline {
             echo 'Le pipeline a échoué.'
         }
         always {
-            sh '''
-                docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} || true
-                docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest || true
-            '''
+            script {
+                // Nettoyage avec doubles guillemets
+                sh "docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} || true"
+                sh "docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest || true"
+            }
         }
     }
 }
-
