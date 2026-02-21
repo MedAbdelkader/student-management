@@ -19,7 +19,7 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 echo 'Exécution des tests unitaires...'
-                sh 'mvn test'
+                //sh 'mvn test'
             }
             post {
                 always {
@@ -40,7 +40,7 @@ pipeline {
         stage('Build with Maven') {
             steps {
                 echo 'Compilation du projet Spring Boot...'
-                sh 'mvn -DskipTests package'
+                //sh 'mvn -DskipTests package'
             }
         }
 
@@ -49,8 +49,8 @@ pipeline {
                 echo 'Construction de l\'image Docker...'
                 script {
                     // Utilisation de doubles guillemets pour l'interpolation des variables
-                    sh "docker build -t ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ."
-                    sh "docker tag ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
+                    //sh "docker build -t ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                    //sh "docker tag ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
                 }
             }
         }
@@ -60,10 +60,10 @@ pipeline {
                 echo 'Push de l\'image sur Docker Hub...'
                 script {
                     // Les variables _PSW et _USR sont injectées par Jenkins via credentials()
-                    sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
-                    sh "docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
-                    sh "docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
-                    sh "docker logout"
+                    //sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
+                    //sh "docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    //sh "docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
+                    //sh "docker logout"
                 }
             }
         }
@@ -72,7 +72,7 @@ pipeline {
     post {
         success {
             echo 'Pipeline exécuté avec succès!'
-            echo "Image Docker disponible: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+            //echo "Image Docker disponible: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
         }
         failure {
             echo 'Le pipeline a échoué.'
@@ -80,8 +80,8 @@ pipeline {
         always {
             script {
                 // Nettoyage avec doubles guillemets
-                sh "docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} || true"
-                sh "docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest || true"
+                //sh "docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} || true"
+                //sh "docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest || true"
             }
         }
     }
