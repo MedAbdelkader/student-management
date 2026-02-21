@@ -19,7 +19,7 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 echo 'Exécution des tests unitaires...'
-                sh 'mvn clean test'
+                sh 'mvn test'
             }
             post {
                 always {
